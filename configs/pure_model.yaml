@@ -1,0 +1,10 @@
+input: input/images/
+output: output/images/
+
+device: cuda
+
+model:
+  _target_: scripts.pure_model.SegmentAnythingModelWrapper
+  model_type: vit_b
+  checkpoint: ${oc.env:UDATADIR}/models/seg_models/segment_anything/sam_vit_b_01ec64.pth
+  device: ${device}

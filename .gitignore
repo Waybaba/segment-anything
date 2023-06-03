@@ -44,5 +44,7 @@ package-lock.json
 
 # 
 /output/*
+/output
+/outputs
 /input/*
 .env
