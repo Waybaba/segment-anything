@@ -1,10 +1,30 @@
-input: input/images/
-output: output/images/
+# input: input/images/
+
+input: 
+  - ${oc.env:UDATADIR}/Cityscapes/leftImg8bit/val/frankfurt/
+  - ${oc.env:UDATADIR}/Cityscapes/leftImg8bit/val/lindau/
+  - ${oc.env:UDATADIR}/Cityscapes/leftImg8bit/val/munster/
+
+output: ${oc.env:UDATADIR}/Cityscapes/sam_val/
 
 device: cuda
 
 model:
   _target_: scripts.pure_model.SegmentAnythingModelWrapper
-  model_type: vit_b
-  checkpoint: ${oc.env:UDATADIR}/models/seg_models/segment_anything/sam_vit_b_01ec64.pth
+  # model_type: vit_b
+  # checkpoint: ${oc.env:UDATADIR}/models/seg_models/segment_anything/sam_vit_b_01ec64.pth
+  model_type: vit_h
+  checkpoint: ${oc.env:UDATADIR}/models/seg_models/segment_anything/sam_vit_h_4b8939.pth
   device: ${device}
+
+sam:
+  checkpoint: ${model.checkpoint}
+  model_type: ${model.model_type}
+
+mask_generator:
+  _target_: segment_anything.SamAutomaticMaskGenerator
+  _partial_: true
+
+
+
+mode: auto_mask # select what function to execute # auto_mask, point_predict
