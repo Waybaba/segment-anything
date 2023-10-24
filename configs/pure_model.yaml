@@ -6,6 +6,7 @@ input:
   - ${oc.env:UDATADIR}/Cityscapes/leftImg8bit/val/munster/
 
 output: ${oc.env:UDATADIR}/Cityscapes/sam_val/
+# output: ${oc.env:UDATADIR}/Cityscapes/sam_val_debug/
 
 device: cuda
 

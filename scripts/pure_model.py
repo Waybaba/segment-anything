@@ -93,11 +93,11 @@ def automask_to_bwh(automask):
 	"""
 	w, h = automask[0]["segmentation"].shape
 	automask = sorted(automask, key=lambda x: x["area"], reverse=True)
-	automask_bwh = np.zeros((len(automask), w, h), dtype=np.uint8)
+	automask_bwh = np.zeros((w, h), dtype=np.uint8)
 	
 	for i, mask in enumerate(automask):
 		indices = np.where(mask["segmentation"] == 1)
-		automask_bwh[i][indices] = i + 1
+		automask_bwh[indices] = i + 1	
 	automask_bwh = automask_bwh.astype(np.uint8)
 	return automask_bwh
 
@@ -114,7 +114,7 @@ def automask_to_bnwh(automask):
 	w, h = automask[0]["segmentation"].shape
 	automask = np.array([mask["segmentation"] for mask in automask])
 	automask = automask.astype(np.uint8)
-	return automask_bwh
+	return automask
 
 
 def get_all_paths(arg_path):
@@ -207,6 +207,7 @@ def auto_mask(args):
 	(args.output / "plotmask").mkdir(exist_ok=True, parents=True)
 	(args.output / "automask_bnwh").mkdir(exist_ok=True, parents=True)
 	(args.output / "automask_bwh").mkdir(exist_ok=True, parents=True)
+	(args.output / "feats_bcwh").mkdir(exist_ok=True, parents=True)
 	
 	# clear output folder
 	# for f in (args.output / "plotmask").iterdir():
@@ -220,25 +221,30 @@ def auto_mask(args):
 	# main
 	image_paths = get_all_paths(args.input)
 	for i, image_path in enumerate(image_paths):
-		print(f"[{i+1}/{len(image_paths)}] start {image_path.stem} ... ", end="")
+		print(f"[{i+1}/{len(image_paths)}] start {image_path.stem} ... ")
 		image = cv2.imread(str(image_path))
 		image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-		masks = mask_generator.generate(image)
+
+		mask_generator.predictor.set_image(image)
+		feats = mask_generator.predictor.get_image_embedding()
 		
-		# plot and save /plotmask/... # for visualization
-		plt.figure(figsize=(20, 20))
-		plt.imshow(image)
-		show_anns(masks)
-		plt.axis('off')
 		# save mask data
+		# masks = mask_generator.generate(image)
 		# np.save(str(args.output / "automask_bnwh" / f"{image_path.stem}.npy"), automask_to_bnwh(masks))
 		# np.save(str(args.output / "automask_bwh" / f"{image_path.stem}.npy"), automask_to_bwh(masks))
+		np.save(str(args.output / "feats_bcwh" / f"{image_path.stem}.npy"), feats.numpy())
 
+		# plot and save /plotmask/... # for visualization
+		# plt.figure(figsize=(20, 20))
+		# plt.imshow(image)
+		# show_anns(masks)
+		# plt.axis('off')
+		
 		# plot fig
-		plt.savefig(str(args.output / "plotmask" / f"{image_path.stem}.png"))
-		print(f"saved {image_path.stem}.png")
-		plt.clf()
-		plt.close()
+		# plt.savefig(str(args.output / "plotmask" / f"{image_path.stem}.png"))
+		# print(f"saved {image_path.stem}.png")
+		# plt.clf()
+		# plt.close()
 
 		# save /auto_mask/... # for further use
 
